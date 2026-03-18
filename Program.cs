@@ -33,6 +33,19 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
+// GET /getWelcome?name=yourName
+// Returns JSON with a welcome message: { "message": "<name> welcome back" }
+app.MapGet("/getWelcome", (Microsoft.AspNetCore.Http.HttpRequest req) =>
+{
+    var name = req.Query["name"].ToString();
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        return Results.BadRequest(new { error = "Query parameter 'name' is required." });
+    }
+    return Results.Ok(new { message = name + " welcome back" });
+})
+.WithName("getWelcome");
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
