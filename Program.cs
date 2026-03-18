@@ -42,9 +42,22 @@ app.MapGet("/getWelcome", (Microsoft.AspNetCore.Http.HttpRequest req) =>
     {
         return Results.BadRequest(new { error = "Query parameter 'name' is required." });
     }
-    return Results.Ok(new { message = name + " welcome back" });
+    return Results.Ok(new { message = WelcomeService.CreateMessage(name) });
 })
 .WithName("getWelcome");
+
+// POST /getWelcome
+// Accepts JSON { "name": "..." } and returns { "message": "<name> welcome back" }
+app.MapPost("/getWelcome", async (Microsoft.AspNetCore.Http.HttpRequest req) =>
+{
+    var body = await req.ReadFromJsonAsync<Dictionary<string, string?>>();
+    if (body == null || !body.TryGetValue("name", out var name) || string.IsNullOrWhiteSpace(name))
+    {
+        return Results.BadRequest(new { error = "JSON body must contain 'name'." });
+    }
+    return Results.Ok(new { message = WelcomeService.CreateMessage(name) });
+})
+.WithName("postGetWelcome");
 
 app.Run();
 
@@ -52,3 +65,11 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
+public static class WelcomeService
+{
+    public static string CreateMessage(string name) => name + " welcome back";
+}
+
+// Expose Program class for WebApplicationFactory in integration tests
+public partial class Program { }
